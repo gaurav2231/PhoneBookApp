@@ -3,6 +3,8 @@ package com.phone.book.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,13 +60,12 @@ public class PhoneBookController {
 	@Autowired
     private AuthenticationManager authenticationManager;
 	
-  //  @ResponseStatus(value=HttpStatus.OK,reason = "Registered successfully")
 	@PostMapping("/register")
-	public ResponseEntity<RegisterResponse>  addUser(@RequestBody User user)
+	public ResponseEntity<RegisterResponse>  addUser(@Valid @RequestBody User user)
 	{
+		
     	RegisterResponse response=new RegisterResponse();
-
-		if(user.getPhoneNumber()!=0){
+    
     	String otp = phoneBookService.getOtp();
 		OtpDetails otpDetails=new OtpDetails();
 		otpDetails.setOtp(otp);
@@ -80,19 +81,14 @@ public class PhoneBookController {
 		//contactsRepo.save(contacts);
 	    phoneBookService.addUser(user);
 	    response.setMessage("Registered Successfully");
-	    response.setCode(201);
+	    response.setCode(200);
 	    response.setStatusCode(200);
 		//response.setUser(user);
 
 		return ResponseEntity.ok(response);
-	}else {
-		response.setCode(400);
-		response.setStatusCode(401);
-		response.setMessage("Invalid Credential!!");
-		return ResponseEntity.badRequest().body(response);
-
+		
 	}
-	}
+	
 	
     
     @GetMapping("/hello")
@@ -116,7 +112,7 @@ public class PhoneBookController {
 	{  
 		EditDetailResponse response=new EditDetailResponse();
 		response.setCode(200);
-		response.setStatuscode(201);
+		response.setStatuscode(200);
 		response.setUser(user);
 		response.setMessage("User Details Updated Successfully");
 		user.setCreated(user.getCreated());
@@ -124,21 +120,6 @@ public class PhoneBookController {
 		return ResponseEntity.ok().body(response);
 	} 
 	
-	/*
-	 * @PostMapping("/saveOtp") public ResponseEntity<Message>
-	 * saveOtpInDatabase(@RequestBody User user) { Message message=new Message();
-	 * String otp= phoneBookService.getOtp(); 
-	 * User foundUser =
-	 * phoneBookRepo.findByPhoneNumber(user.getPhoneNumber()); OtpDetails otpDetails
-	 * = new OtpDetails(); otpDetails.setOtp(phoneBookService.getOtp());
-	 * otpDetails.setUser(foundUser); phoneBookService.addOtpDetails(otpDetails);
-	 * message.setMessage("Otp has been generated and saved in database"); return
-	 * ResponseEntity.ok(message);
-	 * 
-	 * 
-	 * 
-	 * }
-	 */
 	
 	
 	@PostMapping("/login")
@@ -164,7 +145,7 @@ public class PhoneBookController {
 			phoneBookRepo.existsByName(a);
 			user.setPassCode(user.getPassCode());	
 			response.setCode(200);
-			response.setStatusCode(201);
+			response.setStatusCode(200);
 			response.setMessage("Login Successfully");
 			
         }
@@ -184,7 +165,7 @@ public class PhoneBookController {
 	{
        RegisterResponse response=new RegisterResponse();
        response.setCode(200);
-       response.setStatusCode(201);
+       response.setStatusCode(200);
        response.setMessage("Phonenumber Updated Successfully");
 			user.setPhoneNumber(user.getPhoneNumber());
             
@@ -197,12 +178,34 @@ public class PhoneBookController {
 	public ResponseEntity<RegisterResponse>  addUser(@RequestBody Contacts contacts)
 	{
 		RegisterResponse response=new RegisterResponse();
+		String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
+		User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
+		contacts.setUser(user);
+
+		//User usr=new User();
 		phoneBookService.addContacts(contacts);
 		response.setCode(200);
-		response.setStatusCode(201);
+		response.setStatusCode(200);
 		response.setMessage("Contacts added successfully");
 		return ResponseEntity.ok(response);
 	}
+	
+	/*
+	@PostMapping("/addContacts")
+	public ResponseEntity<Message>  addUser(@RequestBody Contacts contacts)
+	
+
+	{
+		long phoneNumber = phoneBookServiceImpl.getPhoneNumber();
+		User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
+		Message message=new Message();
+		contacts.setUser(user);
+		phoneBookService.addContacts(contacts);
+		message.setMessage("Contacts added successfully");
+		return ResponseEntity.ok(message);
+		
+	}
+	 */
 		
 	
 	@PutMapping("/editContacts")  
@@ -210,7 +213,7 @@ public class PhoneBookController {
 	{
 		EditContactResponse response=new EditContactResponse();
 		response.setCode(200);
-		response.setStatuscode(201);
+		response.setStatuscode(200);
 		response.setContact(contacts);
 		response.setMessage("contacts Details Updated Successfully");
 		//contacts.setCreated(contacts.getCreated());	
@@ -221,7 +224,7 @@ public class PhoneBookController {
 	
 	
 	@GetMapping("/allContacts")
-	public ResponseEntity<List<Contacts>> addContacts( )   
+	public ResponseEntity<List<Contacts>> addContacts()   
 	{
 		List<Contacts> contacts=new ArrayList<Contacts>();
 		Message message=new Message();	
@@ -268,10 +271,10 @@ public class PhoneBookController {
 	            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(body.getPhoneNumber(), ""));
 	        } catch (Exception e) {
 	            e.printStackTrace();
-	            throw new Exception("Incorrect phoneNumber or password", e);
+	            throw new Exception("Invalid Credentials", e);
 	        }
 			   
-	      User user = phoneBookRepo.findByPhoneNumber(Long.parseLong(body.getPhoneNumber()));
+	      User user = phoneBookRepo.findByPhoneNumber(body.getPhoneNumber());
 	      OtpDetails otp = user.getOtpDetails();
 	      String token = "Error";
 		  if(otp.getOtp().matches(body.getOtp())) {
@@ -306,7 +309,7 @@ public class PhoneBookController {
 	 		  Jsontoken jsontoken=new Jsontoken();
 	 		 jsontoken.setCode(400);
 	 		jsontoken.setStatuscode(401);
-	 		jsontoken.setJsontoken("Not Created Please Provide Valid Credential");
+	 		jsontoken.setToken("Not Created Please Provide Valid Credential");
 	 		jsontoken.setMessage("Invalid Credential");
 			  user.setStatus(0);
 			  
@@ -322,9 +325,9 @@ public class PhoneBookController {
  		  Jsontoken jsontoken=new Jsontoken();
 		 System.out.println("country Code  "+user.getCountryCode());
 		 System.out.println("phoneNumber  "+user.getPhoneNumber());
-		 jsontoken.setJsontoken(token);
+		 jsontoken.setToken(token);
 		 jsontoken.setCode(200);
-		 jsontoken.setStatuscode(201);
+		 jsontoken.setStatuscode(200);
 		 jsontoken.setMessage("OTP Verified Successfully");
 	    	return ResponseEntity.ok().body(jsontoken);
 

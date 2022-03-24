@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -109,7 +110,6 @@ phoneBookRepo.findAll().equals(user.getName());
 		
 		contactsrepo.save(contacts);
 
-	
 	}
 
 
@@ -146,7 +146,7 @@ phoneBookRepo.findAll().equals(user.getName());
 
 	@Override
 	public UserDetails loadUserByUsername(String phoneNo) throws UsernameNotFoundException {
-		User user = phoneBookRepo.findByPhoneNumber(Long.parseLong(phoneNo));
+		User user = phoneBookRepo.findByPhoneNumber(phoneNo);
         return  new org.springframework.security.core.userdetails.User(String.valueOf(user.getPhoneNumber()), "", new ArrayList<>());
 	}
 
@@ -195,7 +195,19 @@ phoneBookRepo.findAll().equals(user.getName());
 
 
 
-	
+	public String getPhoneNumber(){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String phoneNumber = null;
+        
+        if(principal instanceof UserDetails){
+            phoneNumber = ((UserDetails)principal).getUsername();
+        }
+        else{
+            phoneNumber = principal.toString();
+          }
+        return (phoneNumber);
+    }
+
 }
 
 

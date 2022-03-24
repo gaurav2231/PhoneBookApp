@@ -11,7 +11,7 @@ import com.phone.book.entity.User;
 public interface PhoneBookRepo extends JpaRepository<User, Integer> {
  User findByName(String name);
  User findByPassCode(String passCode);
- User findByPhoneNumber(long phoneNo);
+ User findByPhoneNumber(String phoneNumber);
  boolean existsByName(String name);
  boolean existsByPassCode(String passCode);
  boolean existsById(int id);

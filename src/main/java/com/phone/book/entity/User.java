@@ -1,6 +1,7 @@
 package com.phone.book.entity;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,9 +9,12 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -21,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name="User", uniqueConstraints = @UniqueConstraint(columnNames = {"phoneNumber"}))
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties({ "status", "created","updated","otpDetails","contacts"})
+//@JsonIgnoreProperties({ "status", "created","updated","otpDetails","contacts"})
 
 public class User {
 	
@@ -32,24 +36,26 @@ public class User {
     private int id;
     
 	@Column(name= "name")
-
+    @NotBlank (message = "name is required")
     private String name;
 	
+	@NotBlank(message = "email is required")
 	@Column(name= "email")
     private String email;
 	
+	//@NotBlank(message = "countryCode is required")
 	@Column(name= "countryCode")
     private int countryCode;
   
-	
+	@NotBlank(message = "phoneNumber is required")
 	@Column(name= "phoneNumber", unique = true)
-	private long phoneNumber;
+	private String phoneNumber;
 	
-	
-	
+	@NotBlank(message = "passCode is required")
 	@Column(name= "passCode")
 	private String passCode;
 	
+	//@NotBlank(message = "status is required")
 	@Column(name= "status")
     private int status = 0;
    
@@ -64,8 +70,8 @@ public class User {
     @OneToOne(mappedBy = "user")
     private OtpDetails otpDetails;
     
-    @OneToOne(mappedBy = "user")
-  	 private Contacts contacts;
+    @OneToMany(mappedBy = "user")
+  	 private Set<Contacts> contacts;
 
     
 	public int getId() {
@@ -102,11 +108,11 @@ public class User {
 		this.countryCode = countryCode;
 	}
 
-    public long getPhoneNumber() {
+    public String getPhoneNumber() {
 		return phoneNumber;
 	}
 
-   public void setPhoneNumber(long phoneNumber) {
+   public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
 
@@ -138,11 +144,16 @@ public class User {
 		this.updated = updated;
 	}
   	  
-	  public Contacts getContacts() { return contacts; }
 	 
-	 public void setContacts(Contacts contacts) { this.contacts = new Contacts();
-	 }
 	 
+
+	public Set<Contacts> getContacts() {
+	return contacts;
+}
+
+public void setContacts(Set<Contacts> contacts) {
+	this.contacts = contacts;
+}
 
 	public OtpDetails getOtpDetails() {
 	return otpDetails;
@@ -162,7 +173,7 @@ public String toString() {
 }
 
   
-public User(int id, String name, String email, int countryCode, long phoneNumber, String passCode, int status,
+public User(int id, String name, String email, int countryCode, String phoneNumber, String passCode, int status,
 		Date created, Date updated, OtpDetails otpDetails) {
 	super();
 	this.id = id;

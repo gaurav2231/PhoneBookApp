@@ -12,6 +12,8 @@ public interface ContactsRepo extends JpaRepository<Contacts, Integer> {
 
 	void save(User user);
 
+	void save(int id);
+
 
 
 	

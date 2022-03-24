@@ -1,10 +1,20 @@
 package com.phone.book.Jsontoken;
 
 public class Jsontoken {
-private String Jsontoken;
+private String token;
 private int code;
 private int statuscode;
 private String message;
+
+public String getToken() {
+	return token;
+}
+
+public void setToken(String token) {
+	this.token = token;
+}
+
+
 
 public int getCode() {
 	return code;
@@ -30,11 +40,5 @@ public void setMessage(String message) {
 	this.message = message;
 }
 
-public String getJsontoken() {
-	return Jsontoken;
-}
-
-public void setJsontoken(String jsontoken) {
-	Jsontoken = jsontoken;
-}
+ 
 }

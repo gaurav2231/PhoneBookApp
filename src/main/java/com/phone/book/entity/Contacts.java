@@ -3,12 +3,11 @@ package com.phone.book.entity;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,7 +24,7 @@ public class Contacts {
 	private int id;
 	
 	
-	@OneToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "userid", referencedColumnName = "id")
     private User user;
 	
@@ -34,7 +33,7 @@ public class Contacts {
      private String name;
 	
 	@Column(name= "phoneNumber", nullable = false)
-      private long phoneNumber;
+      private String phoneNumber;
 	
 	@Column(name= "countryCode", nullable = false)
     private int countryCode;
@@ -78,14 +77,14 @@ public class Contacts {
 
 
 
-	public long getPhoneNumber() {
+	public String getPhoneNumber() {
 		return phoneNumber;
 	}
 
 
 
 
-	public void setPhoneNumber(long phoneNumber) {
+	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
 
@@ -119,7 +118,7 @@ public class Contacts {
 
 
 
-	public Contacts(int id, User userId, String name, long phoneNumber, int countryCode, String email) {
+	public Contacts(int id, User userId, String name, String phoneNumber, int countryCode, String email) {
 		super();
 		this.id = id;
 		this.user = user;
