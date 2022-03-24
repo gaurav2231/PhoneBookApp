@@ -21,7 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonToken;
 import com.phone.book.Jsontoken.Jsontoken;
 import com.phone.book.entity.Contacts;
+import com.phone.book.entity.EditContactResponse;
+import com.phone.book.entity.EditDetailResponse;
 import com.phone.book.entity.OtpDetails;
+import com.phone.book.entity.RegisterResponse;
 import com.phone.book.entity.User;
 import com.phone.book.entity.testBody;
 import com.phone.book.message.Message;
@@ -55,12 +58,14 @@ public class PhoneBookController {
 	@Autowired
     private AuthenticationManager authenticationManager;
 	
-    @ResponseStatus(value=HttpStatus.OK,reason = "Registered successfully")
+  //  @ResponseStatus(value=HttpStatus.OK,reason = "Registered successfully")
 	@PostMapping("/register")
-	public ResponseEntity<Message>  addUser(@RequestBody User user)
+	public ResponseEntity<RegisterResponse>  addUser(@RequestBody User user)
 	{
-		Message message=new Message();
-		String otp = phoneBookService.getOtp();
+    	RegisterResponse response=new RegisterResponse();
+
+		if(user.getPhoneNumber()!=0){
+    	String otp = phoneBookService.getOtp();
 		OtpDetails otpDetails=new OtpDetails();
 		otpDetails.setOtp(otp);
 		otpDetails.setUser(user);
@@ -74,11 +79,21 @@ public class PhoneBookController {
 		//contacts.setUser(user);
 		//contactsRepo.save(contacts);
 	    phoneBookService.addUser(user);
-		message.setMessage("Registered successfully");
-		
-		return ResponseEntity.ok(message);
+	    response.setMessage("Registered Successfully");
+	    response.setCode(201);
+	    response.setStatusCode(200);
+		//response.setUser(user);
+
+		return ResponseEntity.ok(response);
+	}else {
+		response.setCode(400);
+		response.setStatusCode(401);
+		response.setMessage("Invalid Credential!!");
+		return ResponseEntity.badRequest().body(response);
+
 	}
-    
+	}
+	
     
     @GetMapping("/hello")
 	public String  hello() 
@@ -88,22 +103,25 @@ public class PhoneBookController {
     
     
 	@GetMapping("/getuser")
-	public ResponseEntity<String>  getUserDetails() 
+	public ResponseEntity<List<User>>  getUserDetails() 
 	{
         List<User> user=new ArrayList<>();
 		phoneBookService.getAll(user);
-        return ResponseEntity.ok().body("All users are: "+user);
+        return ResponseEntity.ok().body(user);
 	}
 		
 	
 	@PutMapping("/editDetails")  
-	public ResponseEntity<Message> update(@RequestBody User user )   
+	public ResponseEntity<EditDetailResponse> update(@RequestBody User user )   
 	{  
-		Message message=new Message();		
-		message.setMessage("User Details Edited Successfully");
+		EditDetailResponse response=new EditDetailResponse();
+		response.setCode(200);
+		response.setStatuscode(201);
+		response.setUser(user);
+		response.setMessage("User Details Updated Successfully");
 		user.setCreated(user.getCreated());
 		phoneBookService.saveOrUpdate(user); 
-		return ResponseEntity.ok(message);
+		return ResponseEntity.ok().body(response);
 	} 
 	
 	/*
@@ -124,9 +142,9 @@ public class PhoneBookController {
 	
 	
 	@PostMapping("/login")
-	public ResponseEntity<Message> loginUser(@RequestBody User user , String name)
+	public ResponseEntity<RegisterResponse> loginUser(@RequestBody User user , String name)
 	{
-		Message message=new Message();
+		RegisterResponse response=new RegisterResponse();
 		String a =user.getName();
 		
 		System.out.println("inside db "+ a);
@@ -144,49 +162,61 @@ public class PhoneBookController {
 				phoneBookRepo.existsByPassCode(user.getPassCode())==true)
 		{
 			phoneBookRepo.existsByName(a);
-			user.setPassCode(user.getPassCode());		
-			message.setMessage("Login Successfully");
-        }
-		else {
-
-			message.setMessage("User not Exist");
+			user.setPassCode(user.getPassCode());	
+			response.setCode(200);
+			response.setStatusCode(201);
+			response.setMessage("Login Successfully");
 			
         }
-        return ResponseEntity.ok(message);
+		else {
+			response.setCode(400);
+			response.setStatusCode(401);
+			response.setMessage("Invalid name or passcode");
+			return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.ok(response);
 		
 	}
 	
 	
 	@PutMapping("/ChangePhoneNumber")
-	public ResponseEntity<Message> updateNumber(@RequestBody User user)  
+	public ResponseEntity<RegisterResponse> updateNumber(@RequestBody User user)  
 	{
-			Message message=new Message();		
-			message.setMessage("Phonenumber has been changed and saved in database.");
+       RegisterResponse response=new RegisterResponse();
+       response.setCode(200);
+       response.setStatusCode(201);
+       response.setMessage("Phonenumber Updated Successfully");
 			user.setPhoneNumber(user.getPhoneNumber());
             
 			phoneBookService.saveOrUpdate(user); 
-			return ResponseEntity.ok(message);	
+			return ResponseEntity.ok(response);	
 	}
 	
 	
 	@PostMapping("/addContacts")
-	public ResponseEntity<Message>  addUser(@RequestBody Contacts contacts)
+	public ResponseEntity<RegisterResponse>  addUser(@RequestBody Contacts contacts)
 	{
-		Message message=new Message();
+		RegisterResponse response=new RegisterResponse();
 		phoneBookService.addContacts(contacts);
-		message.setMessage("Contacts added successfully");
-		return ResponseEntity.ok(message);
+		response.setCode(200);
+		response.setStatusCode(201);
+		response.setMessage("Contacts added successfully");
+		return ResponseEntity.ok(response);
 	}
 		
 	
 	@PutMapping("/editContacts")  
-	public ResponseEntity<Message> editContacts(@RequestBody Contacts contacts)   
+	public ResponseEntity<EditContactResponse> editContacts(@RequestBody Contacts contacts)   
 	{
-		Message message=new Message();	
+		EditContactResponse response=new EditContactResponse();
+		response.setCode(200);
+		response.setStatuscode(201);
+		response.setContact(contacts);
+		response.setMessage("contacts Details Updated Successfully");
+		//contacts.setCreated(contacts.getCreated());	
 		contacts.setName(contacts.getName());
         phoneBookService.saveOrUpdate(contacts);
-        message.setMessage("Contact edited and saved successfully");
-		return ResponseEntity.ok(message);
+		return ResponseEntity.ok(response);
 	}
 	
 	
@@ -209,12 +239,14 @@ public class PhoneBookController {
 	  
 	  
 	   @DeleteMapping("/deleteContact/{id}")
-	   public ResponseEntity<Message> deleteContacts(@PathVariable("id") int id)
+	   public ResponseEntity<RegisterResponse> deleteContacts(@PathVariable("id") int id)
 	    {
-			Message message=new Message();	
-	        phoneBookService.deleteContacts(id);
-		    message.setMessage("USer Removed Successfully"); 
-		    return ResponseEntity.ok(message);
+		   RegisterResponse response=new RegisterResponse();
+		   response.setCode(200);
+		   response.setStatusCode(202);
+		   response.setMessage("Successfully Deleted");
+		   phoneBookService.deleteContacts(id);
+		    return ResponseEntity.ok(response);
 	    }
 	  
 	   
@@ -271,7 +303,14 @@ public class PhoneBookController {
 
 		  } 
 		  else {
+	 		  Jsontoken jsontoken=new Jsontoken();
+	 		 jsontoken.setCode(400);
+	 		jsontoken.setStatuscode(401);
+	 		jsontoken.setJsontoken("Not Created Please Provide Valid Credential");
+	 		jsontoken.setMessage("Invalid Credential");
 			  user.setStatus(0);
+			  
+			  return ResponseEntity.badRequest().body(jsontoken);
 
 		  }
 		  user.setPhoneNumber(user.getPhoneNumber());
@@ -284,6 +323,9 @@ public class PhoneBookController {
 		 System.out.println("country Code  "+user.getCountryCode());
 		 System.out.println("phoneNumber  "+user.getPhoneNumber());
 		 jsontoken.setJsontoken(token);
+		 jsontoken.setCode(200);
+		 jsontoken.setStatuscode(201);
+		 jsontoken.setMessage("OTP Verified Successfully");
 	    	return ResponseEntity.ok().body(jsontoken);
 
 	

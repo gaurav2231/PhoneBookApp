@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -41,7 +42,14 @@ public class PhoneBookServiceImpl implements PhoneBookService, UserDetailsServic
 	public List<User> getAll(List<User> user) {
 		
 		phoneBookRepo.findAll().forEach(user1 -> user.add(user1));
+		if(user!=null) {
 		return user;
+		}
+		else {
+			Message message=new Message();
+			message.setMessage("User not found");
+			return (List<User>) ResponseEntity.ok(message);
+		}
 	}
 	
 

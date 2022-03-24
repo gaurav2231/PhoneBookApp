@@ -16,9 +16,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name="User", uniqueConstraints = @UniqueConstraint(columnNames = {"phoneNumber"}))
 @EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties({ "status", "created","updated","otpDetails","contacts"})
 
 public class User {
 	
@@ -57,6 +60,12 @@ public class User {
     @LastModifiedDate
     @Column(name = "updated" ,updatable = false)
     private Date updated;
+    
+    @OneToOne(mappedBy = "user")
+    private OtpDetails otpDetails;
+    
+    @OneToOne(mappedBy = "user")
+  	 private Contacts contacts;
 
     
 	public int getId() {
@@ -128,13 +137,7 @@ public class User {
   public void setUpdated(Date updated) {
 		this.updated = updated;
 	}
-  @OneToOne(mappedBy = "user")
-  private OtpDetails otpDetails;
-  
-  @OneToOne(mappedBy = "user")
-	
-	 private Contacts contacts;
-	  
+  	  
 	  public Contacts getContacts() { return contacts; }
 	 
 	 public void setContacts(Contacts contacts) { this.contacts = new Contacts();

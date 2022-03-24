@@ -14,6 +14,7 @@ public interface PhoneBookRepo extends JpaRepository<User, Integer> {
  User findByPhoneNumber(long phoneNo);
  boolean existsByName(String name);
  boolean existsByPassCode(String passCode);
+ boolean existsById(int id);
  
 
  
