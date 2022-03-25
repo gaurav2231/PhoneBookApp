@@ -11,12 +11,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -61,10 +63,10 @@ public class PhoneBookController {
     private AuthenticationManager authenticationManager;
 	
 	@PostMapping("/register")
-	public ResponseEntity<RegisterResponse>  addUser(@Valid @RequestBody User user)
-	{
-		
-    	RegisterResponse response=new RegisterResponse();
+	public ResponseEntity<RegisterResponse>  addUser(@Validated @RequestBody User user)throws Exception{
+	RegisterResponse response=new RegisterResponse();
+
+	try {
     
     	String otp = phoneBookService.getOtp();
 		OtpDetails otpDetails=new OtpDetails();
@@ -72,31 +74,20 @@ public class PhoneBookController {
 		otpDetails.setUser(user);
 		otpRepo.save(otpDetails);
 		
-		//Contacts contacts = new Contacts();
-		//contacts.setCountryCode(user.getCountryCode());
-		//contacts.setEmail(user.getEmail());
-		//contacts.setPhoneNumber(user.getPhoneNumber());
-		//contacts.setName(user.getName());
-		//contacts.setUser(user);
-		//contactsRepo.save(contacts);
 	    phoneBookService.addUser(user);
 	    response.setMessage("Registered Successfully");
 	    response.setCode(200);
 	    response.setStatusCode(200);
-		//response.setUser(user);
+	}
+        catch (Exception e) {
+      	    response.setMessage("Provide Valid Credentials");
 
-		return ResponseEntity.ok(response);
-		
+         }
+	  return ResponseEntity.ok(response);
+
 	}
 	
 	
-    
-    @GetMapping("/hello")
-	public String  hello() 
-	{
-        return "Hello";
-	}
-    
     
 	@GetMapping("/getuser")
 	public ResponseEntity<List<User>>  getUserDetails() 
@@ -110,68 +101,107 @@ public class PhoneBookController {
 	@PutMapping("/editDetails")  
 	public ResponseEntity<EditDetailResponse> update(@RequestBody User user )   
 	{  
+		String c=user.getName();
+		String b=user.getEmail();
+	   	 user.setName(c);
+	   	 user.setEmail(b);
+	   	 System.out.println("out " + c+" "+b);
+	   	String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
+	   	 user = phoneBookRepo.findByPhoneNumber(phoneNumber);
+	   	 
+	   	 System.out.println("New  " + user.getName());
+	   	 System.out.println("Neww "+ user.getEmail());
+	   	if(phoneBookRepo.existsByName(c)==true || phoneBookRepo.existsByEmail(b)==true) 
+	   	{
+	   		EditDetailResponse response=new EditDetailResponse();
+		       response.setMessage("User already exists");
+			return ResponseEntity.ok(response);	
+	   	}
+	   		else{
+	   	 user.setName(c);
+	   	 user.setEmail(b);
+	   	 phoneBookService.saveOrUpdate(user);
+	   	  
 		EditDetailResponse response=new EditDetailResponse();
 		response.setCode(200);
 		response.setStatuscode(200);
 		response.setUser(user);
 		response.setMessage("User Details Updated Successfully");
 		user.setCreated(user.getCreated());
-		phoneBookService.saveOrUpdate(user); 
 		return ResponseEntity.ok().body(response);
 	} 
-	
+	}
 	
 	
 	@PostMapping("/login")
 	public ResponseEntity<RegisterResponse> loginUser(@RequestBody User user , String name)
 	{
-		RegisterResponse response=new RegisterResponse();
-		String a =user.getName();
-		
-		System.out.println("inside db "+ a);
-	    user.setName(a);
+      		RegisterResponse response=new RegisterResponse();
 		user.setPassCode(user.getPassCode());
+		user.setCountryCode(user.getCountryCode());
+		user.setPhoneNumber(user.getPhoneNumber());
 		System.out.println(user);
-		name =user.getName();
-		System.out.println("name printed "+name );
-		phoneBookRepo.findByName(user.getName());
-
-		System.out.println("Repo name "+phoneBookRepo.existsByName(user.getName()));
-		if(			phoneBookRepo.existsByName(a)==true
-
-				&&
-				phoneBookRepo.existsByPassCode(user.getPassCode())==true)
+		if(phoneBookRepo.existsByphoneNumber(user.getPhoneNumber())==true
+			&&
+				phoneBookRepo.existsByPassCode(user.getPassCode())==true
+			&&
+			phoneBookRepo.existsByCountryCode(user.getCountryCode())==true)
 		{
-			phoneBookRepo.existsByName(a);
-			user.setPassCode(user.getPassCode());	
+			user.setPassCode(user.getPassCode());
+			user.setPhoneNumber(user.getPhoneNumber());
+			user.setCountryCode(user.getCountryCode());
 			response.setCode(200);
 			response.setStatusCode(200);
 			response.setMessage("Login Successfully");
-			
         }
 		else {
 			response.setCode(400);
 			response.setStatusCode(401);
-			response.setMessage("Invalid name or passcode");
+			response.setMessage("Invalid Credential");
 			return ResponseEntity.ok(response);
         }
         return ResponseEntity.ok(response);
-		
 	}
 	
 	
 	@PutMapping("/ChangePhoneNumber")
 	public ResponseEntity<RegisterResponse> updateNumber(@RequestBody User user)  
 	{
+		
+		String b=user.getPhoneNumber();
+	   	 user.setPhoneNumber(user.getPhoneNumber());
+		
+		String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
+	   	 user = phoneBookRepo.findByPhoneNumber(phoneNumber);
+	   	 System.out.println("out " + user.getPhoneNumber());
+	   	
+	   	  
+	   	 System.out.println(b);
+	   	 
+		
+		if(phoneBookRepo.existsByphoneNumber(b)==true) {
+	       
+		
+		RegisterResponse response=new RegisterResponse();
+	       response.setMessage("Phone number already exists");
+
+		
+		return ResponseEntity.ok(response);	
+
+	}else {
        RegisterResponse response=new RegisterResponse();
-       response.setCode(200);
+		
+       user.setPhoneNumber(b);
+   	 
+   	 System.out.println(b);
+   	  
+   	 response.setCode(200);
        response.setStatusCode(200);
        response.setMessage("Phonenumber Updated Successfully");
-			user.setPhoneNumber(user.getPhoneNumber());
             
 			phoneBookService.saveOrUpdate(user); 
 			return ResponseEntity.ok(response);	
-	}
+	}}
 	
 	
 	@PostMapping("/addContacts")
@@ -182,7 +212,6 @@ public class PhoneBookController {
 		User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
 		contacts.setUser(user);
 
-		//User usr=new User();
 		phoneBookService.addContacts(contacts);
 		response.setCode(200);
 		response.setStatusCode(200);
@@ -190,27 +219,16 @@ public class PhoneBookController {
 		return ResponseEntity.ok(response);
 	}
 	
-	/*
-	@PostMapping("/addContacts")
-	public ResponseEntity<Message>  addUser(@RequestBody Contacts contacts)
-	
-
-	{
-		long phoneNumber = phoneBookServiceImpl.getPhoneNumber();
-		User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
-		Message message=new Message();
-		contacts.setUser(user);
-		phoneBookService.addContacts(contacts);
-		message.setMessage("Contacts added successfully");
-		return ResponseEntity.ok(message);
-		
-	}
-	 */
 		
 	
 	@PutMapping("/editContacts")  
 	public ResponseEntity<EditContactResponse> editContacts(@RequestBody Contacts contacts)   
 	{
+		String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
+	   	User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
+	   	int a=user.getId();
+	   	System.out.println(a);
+	   	contacts.setUser(user);
 		EditContactResponse response=new EditContactResponse();
 		response.setCode(200);
 		response.setStatuscode(200);
@@ -235,8 +253,8 @@ public class PhoneBookController {
 	
 	
 	  @GetMapping("viewContactDetails/{id}")
-	  public ResponseEntity<Contacts> viewContactDetails(@PathVariable("id") int id, Contacts contacts) {
-		  
+	  public ResponseEntity<Contacts> viewContactDetails(@PathVariable("id") int id, Contacts contacts) 
+	  {
 	 	   return ResponseEntity.ok().body(contactsRepo.findById(id).get());
 	  }
 	  
@@ -252,18 +270,7 @@ public class PhoneBookController {
 		    return ResponseEntity.ok(response);
 	    }
 	  
-	   
-		/*
-		 * @PostMapping("/otpCheck") public ResponseEntity<Message>
-		 * otpCheck(@RequestBody OtpDetails otpDetails, User user, String otp) { Message
-		 * message=new Message();
-		 * 
-		 * 
-		 * message.setMessage("OTP CHECKED SUCCESSFULLY"); return
-		 * ResponseEntity.ok(message); }
-		 */
-	   
-	   
+
 	   
 	   @PostMapping("/checkOTP")
 		  public ResponseEntity<Jsontoken> checkOTP(@RequestBody testBody body)throws Exception{
@@ -276,19 +283,16 @@ public class PhoneBookController {
 			   
 	      User user = phoneBookRepo.findByPhoneNumber(body.getPhoneNumber());
 	      OtpDetails otp = user.getOtpDetails();
-	      String token = "Error";
+	    String token = "Error";
 		  if(otp.getOtp().matches(body.getOtp())) {
 
 			  	user.setStatus(1);
 			  	phoneBookService.saveOrUpdate(user);
-			  	
-			  	
 			  	User pn =  phoneBookRepo.findByPhoneNumber(user.getPhoneNumber());
 				pn.getName();	
 				pn.getPassCode();
 				System.out.println("Repo name "+phoneBookRepo.existsByName(pn.getName()));
 				if(			phoneBookRepo.existsByName(pn.getName())==true
-
 						&&
 						phoneBookRepo.existsByPassCode(pn.getPassCode())==true)
 				{
@@ -301,28 +305,27 @@ public class PhoneBookController {
                     System.out.println("User not Exist");					
 		        }
 			  	
-				final UserDetails userDetails = phoneBookServiceImpl.loadUserByUsername(String.valueOf(user.getPhoneNumber()));
-		        token = jwtToken.generateToken(userDetails);
-
+				
+				
+				 final UserDetails userDetails =
+			 phoneBookServiceImpl.loadUserByUsername(String.valueOf(user.getPhoneNumber())
+				  ); token = jwtToken.generateToken(userDetails);
+				 
 		  } 
 		  else {
-	 		  Jsontoken jsontoken=new Jsontoken();
-	 		 jsontoken.setCode(400);
+	 		Jsontoken jsontoken=new Jsontoken();
+	 		jsontoken.setCode(400);
 	 		jsontoken.setStatuscode(401);
 	 		jsontoken.setToken("Not Created Please Provide Valid Credential");
 	 		jsontoken.setMessage("Invalid Credential");
-			  user.setStatus(0);
-			  
+			user.setStatus(0);
 			  return ResponseEntity.badRequest().body(jsontoken);
 
 		  }
 		  user.setPhoneNumber(user.getPhoneNumber());
 		  user.setCountryCode(user.getCountryCode());
-			/*
-			 * User pn = phoneBookRepo.findByPhoneNumber(user.getPhoneNumber());
-			 * //System.out.println(pn); pn.getName(); pn.getPassCode();
-			 */
- 		  Jsontoken jsontoken=new Jsontoken();
+			
+ 		 Jsontoken jsontoken=new Jsontoken();
 		 System.out.println("country Code  "+user.getCountryCode());
 		 System.out.println("phoneNumber  "+user.getPhoneNumber());
 		 jsontoken.setToken(token);
@@ -330,21 +333,22 @@ public class PhoneBookController {
 		 jsontoken.setStatuscode(200);
 		 jsontoken.setMessage("OTP Verified Successfully");
 	    	return ResponseEntity.ok().body(jsontoken);
-
-	
 	 }
 		
 	   
-@DeleteMapping("/deleteMyAccount")
-public ResponseEntity<Message> deleteMyAccount(@RequestBody User user){
-	Message message=new Message();
-	message.setMessage("Account Removed Successfully");
-	phoneBookService.deleteMyAccount(user);
-	System.out.println("Account Removed Successfully");
-	return ResponseEntity.ok(message);
-	
-}
 	   
+	   @PutMapping("/deleteMyAccount")
+	   public ResponseEntity<Message> deleteMyAccount(){
+	   	Message message=new Message();
+	   	String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
+	   	User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
+	   	message.setMessage("Account Removed Successfully");
+	   	user.setStatus(2);
+	   	phoneBookService.saveOrUpdate(user);
+	       return ResponseEntity.ok(message);
+	   }  
+	   
+
 }  
 
 		 

@@ -13,8 +13,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -29,7 +31,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public class User {
 	
-	
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name= "id")
@@ -39,14 +40,16 @@ public class User {
     @NotBlank (message = "name is required")
     private String name;
 	
+	@Email
 	@NotBlank(message = "email is required")
-	@Column(name= "email")
+	@Column(name= "email", unique = true)
     private String email;
 	
 	//@NotBlank(message = "countryCode is required")
 	@Column(name= "countryCode")
     private int countryCode;
-  
+    
+	@Size(min = 3, max = 10)
 	@NotBlank(message = "phoneNumber is required")
 	@Column(name= "phoneNumber", unique = true)
 	private String phoneNumber;
@@ -60,11 +63,11 @@ public class User {
     private int status = 0;
    
     @CreatedDate
-    @Column(name = "created", updatable=false)
+    @Column(name = "created")
     private Date created;
     
     @LastModifiedDate
-    @Column(name = "updated" ,updatable = false)
+    @Column(name = "updated")
     private Date updated;
     
     @OneToOne(mappedBy = "user")
@@ -189,6 +192,11 @@ public User(int id, String name, String email, int countryCode, String phoneNumb
 }
 
 public User() {}
+
+public boolean equals(Object setPhoneNumber) {
+	// TODO Auto-generated method stub
+	return false;
+}
    
 }
 

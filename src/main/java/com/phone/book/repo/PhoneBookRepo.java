@@ -10,11 +10,16 @@ import com.phone.book.entity.User;
 @Repository
 public interface PhoneBookRepo extends JpaRepository<User, Integer> {
  User findByName(String name);
+ User findByEmail(String email);
+
  User findByPassCode(String passCode);
  User findByPhoneNumber(String phoneNumber);
  boolean existsByName(String name);
  boolean existsByPassCode(String passCode);
  boolean existsById(int id);
+boolean existsByphoneNumber(String phoneNumber);
+boolean existsByCountryCode(int countryCode);
+boolean existsByEmail(String email);
  
 
  

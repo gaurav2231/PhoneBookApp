@@ -9,6 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -32,12 +35,15 @@ public class Contacts {
 	@Column(name= "name",nullable = false)
      private String name;
 	
+	@Size(min = 3, max = 10)
 	@Column(name= "phoneNumber", nullable = false)
       private String phoneNumber;
 	
 	@Column(name= "countryCode", nullable = false)
     private int countryCode;
 	
+	@Email
+	@NotBlank(message = "email is required")
 	@Column(name= "email")
      private String email;
 

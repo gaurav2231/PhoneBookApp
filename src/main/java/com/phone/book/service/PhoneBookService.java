@@ -14,7 +14,6 @@ public interface PhoneBookService {
 
 	public String getOtp();
 
-	public void saveOrUpdate(User user);
 
 	public void addOtpDetails(OtpDetails otpdetails);
 
@@ -37,6 +36,9 @@ public interface PhoneBookService {
 	public void deleteMyAccount(User user);
 	
 	public void loginlogic(User user);
+
+	void saveOrUpdate(User user);
+
 
 	
 
