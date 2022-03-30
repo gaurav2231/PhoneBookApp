@@ -11,18 +11,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonToken;
 import com.phone.book.Jsontoken.Jsontoken;
 import com.phone.book.entity.Contacts;
 import com.phone.book.entity.EditContactResponse;
@@ -61,13 +57,14 @@ public class PhoneBookController {
 	
 	@Autowired
     private AuthenticationManager authenticationManager;
-	
 	@PostMapping("/register")
-	public ResponseEntity<RegisterResponse>  addUser(@Validated @RequestBody User user)throws Exception{
+	//@RequestMapping(value="/register",method=RequestMethod.POST ,produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<RegisterResponse>  addUser(@Valid @RequestBody User user)throws Exception{
 	RegisterResponse response=new RegisterResponse();
 
 	try {
-    
+    //  JSONObject obj=new JSONObject();
+   
     	String otp = phoneBookService.getOtp();
 		OtpDetails otpDetails=new OtpDetails();
 		otpDetails.setOtp(otp);
@@ -78,14 +75,14 @@ public class PhoneBookController {
 	    response.setMessage("Registered Successfully");
 	    response.setCode(200);
 	    response.setStatusCode(200);
+		  return ResponseEntity.ok(response);
+
 	}
         catch (Exception e) {
-      	    response.setMessage("Provide Valid Credentials");
-
-         }
-	  return ResponseEntity.ok(response);
-
-	}
+              	    response.setMessage("Provide Valid Credentials");
+      	  return new ResponseEntity<RegisterResponse>(HttpStatus.NOT_FOUND);
+        }
+ 	}
 	
 	
     
@@ -110,7 +107,7 @@ public class PhoneBookController {
 	   	 user = phoneBookRepo.findByPhoneNumber(phoneNumber);
 	   	 
 	   	 System.out.println("New  " + user.getName());
-	   	 System.out.println("Neww "+ user.getEmail());
+	   	 System.out.println("New "+ user.getEmail());
 	   	if(phoneBookRepo.existsByName(c)==true || phoneBookRepo.existsByEmail(b)==true) 
 	   	{
 	   		EditDetailResponse response=new EditDetailResponse();
@@ -260,9 +257,13 @@ public class PhoneBookController {
 	  
 	  
 	   @DeleteMapping("/deleteContact/{id}")
-	   public ResponseEntity<RegisterResponse> deleteContacts(@PathVariable("id") int id)
+	   public ResponseEntity<RegisterResponse> deleteContacts(@PathVariable("id") int id,Contacts contact)
 	    {
-		   RegisterResponse response=new RegisterResponse();
+			String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
+		   	User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
+
+		   	RegisterResponse response=new RegisterResponse();
+		   	
 		   response.setCode(200);
 		   response.setStatusCode(202);
 		   response.setMessage("Successfully Deleted");
@@ -304,12 +305,12 @@ public class PhoneBookController {
 
                     System.out.println("User not Exist");					
 		        }
-			  	
 				
+				// Generate Token 
 				
 				 final UserDetails userDetails =
-			 phoneBookServiceImpl.loadUserByUsername(String.valueOf(user.getPhoneNumber())
-				  ); token = jwtToken.generateToken(userDetails);
+			 phoneBookServiceImpl.loadUserByUsername(String.valueOf(user.getPhoneNumber())); 
+				 token = jwtToken.generateToken(userDetails);
 				 
 		  } 
 		  else {
@@ -339,10 +340,12 @@ public class PhoneBookController {
 	   
 	   @PutMapping("/deleteMyAccount")
 	   public ResponseEntity<Message> deleteMyAccount(){
+		
 	   	Message message=new Message();
 	   	String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
 	   	User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
 	   	message.setMessage("Account Removed Successfully");
+	   	System.out.println(phoneNumber);
 	   	user.setStatus(2);
 	   	phoneBookService.saveOrUpdate(user);
 	       return ResponseEntity.ok(message);

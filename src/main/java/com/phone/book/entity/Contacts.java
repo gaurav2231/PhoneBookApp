@@ -26,7 +26,29 @@ public class Contacts {
 	@Column(name= "id")
 	private int id;
 	
+//	private int status;
 	
+	
+	public Contacts(int id, int status, User user, String name, @Size(min = 3, max = 10) String phoneNumber,
+			int countryCode, @Email @NotBlank(message = "email is required") String email) {
+		super();
+		this.id = id;
+	//	this.status = status;
+		this.user = user;
+		this.name = name;
+		this.phoneNumber = phoneNumber;
+		this.countryCode = countryCode;
+		this.email = email;
+	}
+
+
+
+
+	
+
+
+
+
 	@ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "userid", referencedColumnName = "id")
     private User user;
@@ -103,7 +125,6 @@ public class Contacts {
 
 
 
-
 	public void setCountryCode(int countryCode) {
 		this.countryCode = countryCode;
 	}
@@ -124,9 +145,10 @@ public class Contacts {
 
 
 
-	public Contacts(int id, User userId, String name, String phoneNumber, int countryCode, String email) {
+	public Contacts(int id, User userId, String name,int status, String phoneNumber, int countryCode, String email) {
 		super();
 		this.id = id;
+		//this.status = status;
 		this.user = user;
 		this.name = name;
 		this.phoneNumber = phoneNumber;

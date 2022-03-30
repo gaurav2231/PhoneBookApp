@@ -25,7 +25,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name="User", uniqueConstraints = @UniqueConstraint(columnNames = {"phoneNumber"}))
+@Table(name="User", uniqueConstraints = {@UniqueConstraint(columnNames = {"phoneNumber","email"})})
 @EntityListeners(AuditingEntityListener.class)
 //@JsonIgnoreProperties({ "status", "created","updated","otpDetails","contacts"})
 
@@ -147,8 +147,6 @@ public class User {
 		this.updated = updated;
 	}
   	  
-	 
-	 
 
 	public Set<Contacts> getContacts() {
 	return contacts;
@@ -196,8 +194,8 @@ public User() {}
 public boolean equals(Object setPhoneNumber) {
 	// TODO Auto-generated method stub
 	return false;
-}
-   
+ 
+  }
 }
 
 
