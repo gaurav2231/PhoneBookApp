@@ -3,15 +3,13 @@ package com.phone.book.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,8 +56,7 @@ public class PhoneBookController {
 	@Autowired
     private AuthenticationManager authenticationManager;
 	@PostMapping("/register")
-	//@RequestMapping(value="/register",method=RequestMethod.POST ,produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<RegisterResponse>  addUser(@Valid @RequestBody User user)throws Exception{
+	public ResponseEntity<RegisterResponse>  addUser(@Validated @RequestBody User user)throws Exception{
 	RegisterResponse response=new RegisterResponse();
 
 	try {
@@ -208,8 +205,10 @@ public class PhoneBookController {
 		String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
 		User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
 		contacts.setUser(user);
+	
 
 		phoneBookService.addContacts(contacts);
+		//System.out.println(user);
 		response.setCode(200);
 		response.setStatusCode(200);
 		response.setMessage("Contacts added successfully");
@@ -255,20 +254,61 @@ public class PhoneBookController {
 	 	   return ResponseEntity.ok().body(contactsRepo.findById(id).get());
 	  }
 	  
+
+//	  @PutMapping("/deleteContact/{id}")
+//	   public  void deleteContacts(@PathVariable("id") int id,Contacts contact){
+//		  System.out.println("contact id in c table"+contact.getId());
+//		  System.out.println("given contact id"+id);
+//
+//	  if(id==contact.getId()) {
+//
+//	 contact.setStatus(2);
+//	  System.out.println("true");
+//
+//	  phoneBookService.saveOrUpdate(contact);
+//
+//	  }
+//	  else {
+//		  System.out.println("false");
+//	  }
+//	}
 	  
-	   @DeleteMapping("/deleteContact/{id}")
+	  
+	   @PutMapping("/deleteContact/{id}")
 	   public ResponseEntity<RegisterResponse> deleteContacts(@PathVariable("id") int id,Contacts contact)
 	    {
+      // 	System.out.println("start api/////////");
+
 			String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
 		   	User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
+		   	System.out.println("contact id in contact  "+contact.getId());
+            System.out.println("UserId in Contact  "+user.getId());
+            
+           // if(id==contact.getId())
+           if(contactsRepo.existsById(user.getId())==true && contactsRepo.existsById(contact.getId())==true) {
+            	contact.setStatus(2);
+                 	System.out.println("start ");
 
-		   	RegisterResponse response=new RegisterResponse();
-		   	
-		   response.setCode(200);
-		   response.setStatusCode(202);
-		   response.setMessage("Successfully Deleted");
-		   phoneBookService.deleteContacts(id);
-		    return ResponseEntity.ok(response);
+            	//contactsRepo.save(contact);    
+              	phoneBookService.saveOrUpdate(contact);
+                 	//System.out.println("end api/////////");
+
+    	RegisterResponse response=new RegisterResponse();
+    		   response.setCode(200);
+    		   response.setStatusCode(200);
+    		   response.setMessage("Successfully Deleted");
+   		    return ResponseEntity.ok(response);
+
+            }
+            else {
+            	RegisterResponse response=new RegisterResponse();
+    		   	
+     		   response.setCode(400);
+     		   response.setStatusCode(400);
+     		   response.setMessage("User not Found");
+     		    return ResponseEntity.ok(response);
+            }
+		   
 	    }
 	  
 
@@ -290,8 +330,10 @@ public class PhoneBookController {
 			  	user.setStatus(1);
 			  	phoneBookService.saveOrUpdate(user);
 			  	User pn =  phoneBookRepo.findByPhoneNumber(user.getPhoneNumber());
+			//  	System.out.println("phone no row is   "+pn);
 				pn.getName();	
 				pn.getPassCode();
+				
 				System.out.println("Repo name "+phoneBookRepo.existsByName(pn.getName()));
 				if(			phoneBookRepo.existsByName(pn.getName())==true
 						&&

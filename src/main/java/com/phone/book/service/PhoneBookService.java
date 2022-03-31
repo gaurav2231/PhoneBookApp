@@ -39,6 +39,10 @@ public interface PhoneBookService {
 
 	void saveOrUpdate(User user);
 
+	public void saveOrUpdate(int id);
+
+	//public void saveOrUpdate(int id);
+
 
 	
 

@@ -26,14 +26,14 @@ public class Contacts {
 	@Column(name= "id")
 	private int id;
 	
-//	private int status;
+	private int status;
 	
 	
 	public Contacts(int id, int status, User user, String name, @Size(min = 3, max = 10) String phoneNumber,
 			int countryCode, @Email @NotBlank(message = "email is required") String email) {
 		super();
 		this.id = id;
-	//	this.status = status;
+		this.status = status;
 		this.user = user;
 		this.name = name;
 		this.phoneNumber = phoneNumber;
@@ -44,7 +44,16 @@ public class Contacts {
 
 
 
-	
+	public int getStatus() {
+		return status;
+	}
+
+
+
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
 
 
 
@@ -148,7 +157,7 @@ public class Contacts {
 	public Contacts(int id, User userId, String name,int status, String phoneNumber, int countryCode, String email) {
 		super();
 		this.id = id;
-		//this.status = status;
+		this.status = status;
 		this.user = user;
 		this.name = name;
 		this.phoneNumber = phoneNumber;

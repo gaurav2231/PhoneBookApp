@@ -208,6 +208,16 @@ phoneBookRepo.findAll().equals(user.getName());
           }
         return (phoneNumber);
     }
+
+
+
+	@Override
+	public void saveOrUpdate(int id) {
+contactsrepo.save(id);		
+	}
+
+
+
 	
 
 	
