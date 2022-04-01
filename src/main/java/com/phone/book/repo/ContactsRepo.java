@@ -17,6 +17,10 @@ public interface ContactsRepo extends CrudRepository<Contacts, Integer> {
 
 	void save(int id);
 
+	boolean existsByphoneNumber(String phoneNumber);
+
+	boolean existsByEmail(String email);
+
 
 
 	

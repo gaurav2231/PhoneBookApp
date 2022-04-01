@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.phone.book.Jsontoken.Jsontoken;
 import com.phone.book.entity.Contacts;
 import com.phone.book.entity.EditContactResponse;
@@ -57,10 +59,14 @@ public class PhoneBookController {
     private AuthenticationManager authenticationManager;
 	@PostMapping("/register")
 	public ResponseEntity<RegisterResponse>  addUser(@Validated @RequestBody User user)throws Exception{
+		
+		if(phoneBookRepo.existsByphoneNumber(user.getPhoneNumber())==false
+				||
+				phoneBookRepo.existsByEmail(user.getEmail())==false)
+			{
 	RegisterResponse response=new RegisterResponse();
 
 	try {
-    //  JSONObject obj=new JSONObject();
    
     	String otp = phoneBookService.getOtp();
 		OtpDetails otpDetails=new OtpDetails();
@@ -78,9 +84,17 @@ public class PhoneBookController {
         catch (Exception e) {
               	    response.setMessage("Provide Valid Credentials");
       	  return new ResponseEntity<RegisterResponse>(HttpStatus.NOT_FOUND);
-        }
+        }}
+		else {
+			RegisterResponse message=new RegisterResponse();
+				   		
+				   		message.setCode(409);
+				   		message.setStatusCode(409);
+				   		message.setMessage("User Already Exists");
+				   		System.out.println(message.getMessage());
+						return ResponseEntity.badRequest().body(message);
+				   	}
  	}
-	
 	
     
 	@GetMapping("/getuser")
@@ -93,7 +107,7 @@ public class PhoneBookController {
 		
 	
 	@PutMapping("/editDetails")  
-	public ResponseEntity<EditDetailResponse> update(@RequestBody User user )   
+	public ResponseEntity<Object> update(@RequestBody User user )   
 	{  
 		String c=user.getName();
 		String b=user.getEmail();
@@ -107,9 +121,11 @@ public class PhoneBookController {
 	   	 System.out.println("New "+ user.getEmail());
 	   	if(phoneBookRepo.existsByName(c)==true || phoneBookRepo.existsByEmail(b)==true) 
 	   	{
-	   		EditDetailResponse response=new EditDetailResponse();
+	   		RegisterResponse response=new RegisterResponse();
 		       response.setMessage("User already exists");
-			return ResponseEntity.ok(response);	
+		       response.setCode(409);
+		       response.setStatusCode(409);
+			return ResponseEntity.badRequest().body(response);	
 	   	}
 	   		else{
 	   	 user.setName(c);
@@ -119,6 +135,7 @@ public class PhoneBookController {
 		EditDetailResponse response=new EditDetailResponse();
 		response.setCode(200);
 		response.setStatuscode(200);
+		
 		response.setUser(user);
 		response.setMessage("User Details Updated Successfully");
 		user.setCreated(user.getCreated());
@@ -178,6 +195,8 @@ public class PhoneBookController {
 		
 		RegisterResponse response=new RegisterResponse();
 	       response.setMessage("Phone number already exists");
+	       response.setCode(409);
+	       response.setStatusCode(409);
 
 		
 		return ResponseEntity.ok(response);	
@@ -199,41 +218,75 @@ public class PhoneBookController {
 	
 	
 	@PostMapping("/addContacts")
-	public ResponseEntity<RegisterResponse>  addUser(@RequestBody Contacts contacts)
+	public ResponseEntity<Object>  addUser(@RequestBody Contacts contacts)
 	{
-		RegisterResponse response=new RegisterResponse();
+		if(contactsRepo.existsByphoneNumber(contacts.getPhoneNumber())==false
+				||
+				contactsRepo.existsByEmail(contacts.getEmail())==false)
+			{
+			EditContactResponse response=new EditContactResponse();
 		String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
 		User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
 		contacts.setUser(user);
 	
 
 		phoneBookService.addContacts(contacts);
-		//System.out.println(user);
 		response.setCode(200);
-		response.setStatusCode(200);
+		response.setStatuscode(200);
 		response.setMessage("Contacts added successfully");
+		response.setContact(contacts);
+		
 		return ResponseEntity.ok(response);
+			}
+		else {
+RegisterResponse message=new RegisterResponse();
+	   		
+	   		message.setMessage("Already Exists");
+	   		message.setCode(400);
+	   		message.setStatusCode(400);
+			return ResponseEntity.badRequest().body(message);
+	   	}
+		
 	}
 	
 		
-	
-	@PutMapping("/editContacts")  
-	public ResponseEntity<EditContactResponse> editContacts(@RequestBody Contacts contacts)   
+	@PutMapping("/editContacts/{id}")  
+	public ResponseEntity<Object> editContacts(@PathVariable("id") int id, @RequestBody Contacts contacts)   
 	{
+  
 		String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
 	   	User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
 	   	int a=user.getId();
 	   	System.out.println(a);
+	   	if(contactsRepo.existsByphoneNumber(contacts.getPhoneNumber())==false
+				||
+				contactsRepo.existsByEmail(contacts.getEmail())==false)
+			{
+	     contacts.setId(id);
+	     contacts.getId();
+	     System.out.println("contact id is   "+contacts.getId());
+			EditContactResponse response=new EditContactResponse();
+
 	   	contacts.setUser(user);
-		EditContactResponse response=new EditContactResponse();
 		response.setCode(200);
 		response.setStatuscode(200);
 		response.setContact(contacts);
 		response.setMessage("contacts Details Updated Successfully");
-		//contacts.setCreated(contacts.getCreated());	
+		
 		contacts.setName(contacts.getName());
         phoneBookService.saveOrUpdate(contacts);
 		return ResponseEntity.ok(response);
+			}
+	   	
+	   	else {
+	   		RegisterResponse message1=new RegisterResponse();
+	   		
+	   		message1.setCode(404);
+	   		message1.setStatusCode(404);
+	   		message1.setMessage("Invalid Entry");
+	   		System.out.println(message1.getMessage());
+			return ResponseEntity.badRequest().body(message1);
+	   	}
 	}
 	
 	
@@ -255,62 +308,31 @@ public class PhoneBookController {
 	  }
 	  
 
-//	  @PutMapping("/deleteContact/{id}")
-//	   public  void deleteContacts(@PathVariable("id") int id,Contacts contact){
-//		  System.out.println("contact id in c table"+contact.getId());
-//		  System.out.println("given contact id"+id);
-//
-//	  if(id==contact.getId()) {
-//
-//	 contact.setStatus(2);
-//	  System.out.println("true");
-//
-//	  phoneBookService.saveOrUpdate(contact);
-//
-//	  }
-//	  else {
-//		  System.out.println("false");
-//	  }
-//	}
-	  
-	  
-	   @PutMapping("/deleteContact/{id}")
-	   public ResponseEntity<RegisterResponse> deleteContacts(@PathVariable("id") int id,Contacts contact)
-	    {
-      // 	System.out.println("start api/////////");
-
-			String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
-		   	User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
-		   	System.out.println("contact id in contact  "+contact.getId());
-            System.out.println("UserId in Contact  "+user.getId());
-            
-           // if(id==contact.getId())
-           if(contactsRepo.existsById(user.getId())==true && contactsRepo.existsById(contact.getId())==true) {
-            	contact.setStatus(2);
-                 	System.out.println("start ");
-
-            	//contactsRepo.save(contact);    
-              	phoneBookService.saveOrUpdate(contact);
-                 	//System.out.println("end api/////////");
-
-    	RegisterResponse response=new RegisterResponse();
-    		   response.setCode(200);
-    		   response.setStatusCode(200);
-    		   response.setMessage("Successfully Deleted");
-   		    return ResponseEntity.ok(response);
-
-            }
-            else {
-            	RegisterResponse response=new RegisterResponse();
-    		   	
-     		   response.setCode(400);
-     		   response.setStatusCode(400);
-     		   response.setMessage("User not Found");
-     		    return ResponseEntity.ok(response);
-            }
-		   
-	    }
-	  
+	  @PutMapping("/deleteContact/{id}")
+	   public  ResponseEntity<RegisterResponse> deleteContacts(@PathVariable ("id") int id, Contacts contact){
+		  RegisterResponse response=new RegisterResponse();
+        try {
+       	 contact.setId(id);
+		  contact.getId();
+		  Contacts foundContact = contactsRepo.findById(contact.getId()).get();
+		  foundContact.setStatus(2);
+		  Contacts savedContact = contactsRepo.save(foundContact);
+		  response.setCode(200);
+			response.setStatusCode(200);
+			response.setMessage("Contact Removed Successfully");
+			return ResponseEntity.ok(response);
+			}
+     catch(Exception e)
+     {
+	 System.out.print(e.getMessage());
+	 response.setCode(400);
+	 response.setStatusCode(400);
+	 response.setMessage(e.getMessage());
+	 return ResponseEntity.badRequest().body(response);
+  }
+	  }
+	   
+	   
 
 	   
 	   @PostMapping("/checkOTP")

@@ -1,10 +1,20 @@
 package com.phone.book.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({"code","statusCode","message"})
+
 public class RegisterResponse {
 	
+	@JsonProperty("message")
 	private String message;
+	
+	@JsonProperty("code")
 	private int code;
-	private int statusCode;
+	
+	@JsonProperty("statusCode")
+    private int statusCode;
 	
 	public String getMessage() {
 		return message;

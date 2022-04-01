@@ -23,12 +23,13 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Entity
 @Table(name="User", uniqueConstraints = {@UniqueConstraint(columnNames = {"phoneNumber","email"})})
 @EntityListeners(AuditingEntityListener.class)
-//@JsonIgnoreProperties({ "status", "created","updated","otpDetails","contacts"})
-
+@JsonIgnoreProperties({ "created","updated"})
+//@JsonPropertyOrder({"code","","","","",""})
 public class User {
 	
     @Id 

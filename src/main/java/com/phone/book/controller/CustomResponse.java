@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.phone.book.entity.RegisterResponse;
 
+//@JsonPropertyOrder({"code","","","","",""})
 
 @ControllerAdvice
 public class CustomResponse extends ResponseEntityExceptionHandler{
