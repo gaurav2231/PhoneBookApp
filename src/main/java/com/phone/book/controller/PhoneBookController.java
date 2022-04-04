@@ -2,6 +2,7 @@ package com.phone.book.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -312,9 +313,13 @@ RegisterResponse message=new RegisterResponse();
 	   public  ResponseEntity<RegisterResponse> deleteContacts(@PathVariable ("id") int id, Contacts contact){
 		  RegisterResponse response=new RegisterResponse();
         try {
+        	
+  		  Contacts foundContact = contactsRepo.findById(contact.getId()).get();
+            System.out.println("status "+foundContact.getStatus());
+        	if(foundContact.getStatus()==0) {
        	 contact.setId(id);
 		  contact.getId();
-		  Contacts foundContact = contactsRepo.findById(contact.getId()).get();
+		  //Contacts foundContact = contactsRepo.findById(contact.getId()).get();
 		  foundContact.setStatus(2);
 		  Contacts savedContact = contactsRepo.save(foundContact);
 		  response.setCode(200);
@@ -322,6 +327,16 @@ RegisterResponse message=new RegisterResponse();
 			response.setMessage("Contact Removed Successfully");
 			return ResponseEntity.ok(response);
 			}
+        
+        	
+        	else {
+        		response.setCode(404);
+        		response.setStatusCode(404);
+        		response.setMessage("User does not exists !!!!");
+    			return ResponseEntity.ok(response);
+        	}
+        	
+        }
      catch(Exception e)
      {
 	 System.out.print(e.getMessage());
@@ -375,7 +390,6 @@ RegisterResponse message=new RegisterResponse();
 				 final UserDetails userDetails =
 			 phoneBookServiceImpl.loadUserByUsername(String.valueOf(user.getPhoneNumber())); 
 				 token = jwtToken.generateToken(userDetails);
-				 
 		  } 
 		  else {
 	 		Jsontoken jsontoken=new Jsontoken();
@@ -415,7 +429,4 @@ RegisterResponse message=new RegisterResponse();
 	       return ResponseEntity.ok(message);
 	   }  
 	   
-
 }  
-
-		 
