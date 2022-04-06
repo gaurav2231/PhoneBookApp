@@ -18,7 +18,7 @@ public interface PhoneBookRepo extends JpaRepository<User, Integer> {
  boolean existsByPassCode(String passCode);
  boolean existsById(int id);
 boolean existsByphoneNumber(String phoneNumber);
-boolean existsByCountryCode(int countryCode);
+boolean existsByCountryCode(String countryCode);
 boolean existsByEmail(String email);
  
 

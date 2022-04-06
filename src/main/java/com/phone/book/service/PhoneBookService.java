@@ -41,15 +41,9 @@ public interface PhoneBookService {
 
 	public void saveOrUpdate(int id);
 
-	//public void saveOrUpdate(int id);
+	//public void findAllCollection(List<Contacts> contacts);
 
 
-	
-
-
-
-	
-	
 	
 }
 

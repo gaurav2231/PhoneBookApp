@@ -48,7 +48,7 @@ public class User {
 	
 	//@NotBlank(message = "countryCode is required")
 	@Column(name= "countryCode")
-    private int countryCode;
+    private String countryCode;
     
 	@Size(min = 3, max = 10)
 	@NotBlank(message = "phoneNumber is required")
@@ -104,11 +104,11 @@ public class User {
 		this.email = email;
 	}
 
-  public int getCountryCode() {
+  public String getCountryCode() {
 		return countryCode;
 	}
 
-    public void setCountryCode(int countryCode) {
+    public void setCountryCode(String countryCode) {
 		this.countryCode = countryCode;
 	}
 
@@ -175,7 +175,7 @@ public String toString() {
 }
 
   
-public User(int id, String name, String email, int countryCode, String phoneNumber, String passCode, int status,
+public User(int id, String name, String email, String countryCode, String phoneNumber, String passCode, int status,
 		Date created, Date updated, OtpDetails otpDetails) {
 	super();
 	this.id = id;

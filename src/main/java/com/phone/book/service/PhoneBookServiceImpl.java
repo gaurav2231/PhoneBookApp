@@ -99,11 +99,14 @@ phoneBookRepo.findAll().equals(user.getName());
 	public void saveOrUupdate(User user) {
      phoneBookRepo.save(user);
 		
-		
-		
-		
 	}
 
+	public void getStatusFromDB(List<Contacts>  contacts)
+	{
+		
+		contacts.add( contactsrepo.findByStatus(0));	
+		System.out.println("inside Service"+contacts);
+	}
 
 
 	@Override
@@ -126,8 +129,11 @@ phoneBookRepo.findAll().equals(user.getName());
 
 	@Override
 	public void getContactDetails(List<Contacts> contacts) {
-	   contactsrepo.findAll().forEach(contacts1 -> contacts.add(contacts1));		
-	}
+	   contactsrepo.findAll().forEach((contacts1) -> {
+		   if(!contacts1.isDeleted())
+			   contacts.add(contacts1);
+	   });
+	   }
 
 
 
@@ -195,6 +201,7 @@ phoneBookRepo.findAll().equals(user.getName());
 	}
 
 
+	
 
 	public String getPhoneNumber(){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -216,47 +223,4 @@ phoneBookRepo.findAll().equals(user.getName());
 contactsrepo.save(id);		
 	}
 
-
-
-	
-
-	
-	
-
-
-
-	
-
-
-	
-
 }
-
-
-	
-	
-	
-		
-		
-		
-		
-	
-
-
-	
-
-		 
-		 
-	 
-
-	
-	
-
-	
-
-	
-		
-		
-	
-
-

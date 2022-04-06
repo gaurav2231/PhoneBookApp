@@ -13,6 +13,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -166,13 +167,9 @@ public class Contacts {
 	}
 
 
-
-
 	public User getUser() {
 		return user;
 	}
-
-
 
 
 	public void setUser(User user) {
@@ -188,14 +185,14 @@ public class Contacts {
 				+ ", countryCode=" + countryCode + ", email=" + email + "]";
 	}
 
-
-
+	@JsonIgnore
+	public boolean isDeleted() {
+		return this.getStatus()==2;
+	}
 
 	public Contacts() {}
 
 
-
-	
 	
 }
 	
