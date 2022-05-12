@@ -30,40 +30,6 @@ public class Contacts {
 	private int status;
 	
 	
-	public Contacts(int id, int status, User user, String name, @Size(min = 3, max = 10) String phoneNumber,
-			int countryCode, @Email @NotBlank(message = "email is required") String email) {
-		super();
-		this.id = id;
-		this.status = status;
-		this.user = user;
-		this.name = name;
-		this.phoneNumber = phoneNumber;
-		this.countryCode = countryCode;
-		this.email = email;
-	}
-
-
-
-
-	public int getStatus() {
-		return status;
-	}
-
-
-
-
-	public void setStatus(int status) {
-		this.status = status;
-	}
-
-
-
-
-	@ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "userid", referencedColumnName = "id")
-    private User user;
-	
-	
 	@Column(name= "name",nullable = false)
      private String name;
 	
@@ -78,34 +44,34 @@ public class Contacts {
 	@NotBlank(message = "email is required")
 	@Column(name= "email")
      private String email;
+	
+	@ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "userid", referencedColumnName = "id")
+    private User user;
 
 	
-	
-	
-	public int getId() {
-		return id;
+	public int getStatus() {
+		return status;
 	}
 
 
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+
+	public int getId() {
+		return id;
+	}
 
 
 	public void setId(int id) {
 		this.id = id;
 	}
 
-
-
-
-	
-
-
-
-
 	public String getName() {
 		return name;
 	}
-
-
 
 
 	public void setName(String name) {
@@ -113,13 +79,9 @@ public class Contacts {
 	}
 
 
-
-
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}
-
-
 
 
 	public void setPhoneNumber(String phoneNumber) {
@@ -127,19 +89,14 @@ public class Contacts {
 	}
 
 
-
-
 	public int getCountryCode() {
 		return countryCode;
 	}
 
-
-
+	
 	public void setCountryCode(int countryCode) {
 		this.countryCode = countryCode;
 	}
-
-
 
 
 	public String getEmail() {
@@ -147,12 +104,9 @@ public class Contacts {
 	}
 
 
-
-
 	public void setEmail(String email) {
 		this.email = email;
 	}
-
 
 
 	public Contacts(int id, User userId, String name,int status, String phoneNumber, int countryCode, String email) {
@@ -176,7 +130,17 @@ public class Contacts {
 		this.user = user;
 	}
 
-
+	public Contacts(int id, int status, User user, String name, @Size(min = 3, max = 10) String phoneNumber,
+			int countryCode, @Email @NotBlank(message = "email is required") String email) {
+		super();
+		this.id = id;
+		this.status = status;
+		this.user = user;
+		this.name = name;
+		this.phoneNumber = phoneNumber;
+		this.countryCode = countryCode;
+		this.email = email;
+	}
 
 
 	@Override

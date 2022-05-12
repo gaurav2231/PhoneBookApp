@@ -1,8 +1,13 @@
 package com.phone.book.controller;
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lowagie.text.DocumentException;
 import com.phone.book.Jsontoken.Jsontoken;
 import com.phone.book.entity.Contacts;
 import com.phone.book.entity.EditContactResponse;
@@ -26,6 +32,7 @@ import com.phone.book.entity.EditDetailResponse;
 import com.phone.book.entity.OtpDetails;
 import com.phone.book.entity.RegisterResponse;
 import com.phone.book.entity.User;
+import com.phone.book.entity.UserPDFExporter;
 import com.phone.book.entity.testBody;
 import com.phone.book.message.Message;
 import com.phone.book.repo.ContactsRepo;
@@ -34,9 +41,13 @@ import com.phone.book.repo.PhoneBookRepo;
 import com.phone.book.service.JwtUtil;
 import com.phone.book.service.PhoneBookService;
 import com.phone.book.service.PhoneBookServiceImpl;
+import com.phone.book.service.UserServices;
 @CrossOrigin
 @RestController
 public class PhoneBookController {
+	@Autowired
+    private UserServices service;
+	
 	@Autowired
 	private PhoneBookRepo phoneBookRepo;
 	
@@ -74,18 +85,10 @@ public class PhoneBookController {
 		otpDetails.setUser(user);
 		otpRepo.save(otpDetails);
 		
-		//Contacts contacts = new Contacts();
-		//contacts.setCountryCode(user.getCountryCode());
-		//contacts.setEmail(user.getEmail());
-		//contacts.setPhoneNumber(user.getPhoneNumber());
-		//contacts.setName(user.getName());
-		//contacts.setUser(user);
-		//contactsRepo.save(contacts);
 	    phoneBookService.addUser(user);
 	    response.setMessage("Registered Successfully");
 	    response.setCode(200);
 	    response.setStatusCode(200);
-		//response.setUser(user);
 
 		return ResponseEntity.ok(response);
 		}
@@ -100,11 +103,11 @@ public class PhoneBookController {
 		}
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
-			RegisterResponse errresponse=new RegisterResponse();
-			errresponse.setCode(400);
-			errresponse.setStatusCode(400);
-			errresponse.setMessage(e.getMessage());
-			return ResponseEntity.badRequest().body(errresponse);
+			RegisterResponse eresponse=new RegisterResponse();
+			eresponse.setCode(400);
+			eresponse.setStatusCode(400);
+			eresponse.setMessage(e.getMessage());
+			return ResponseEntity.badRequest().body(eresponse);
 		}
 	}
 	
@@ -171,10 +174,7 @@ public class PhoneBookController {
 			&&
 			phoneBookRepo.existsByCountryCode(user.getCountryCode())==true)
 		{
-			user.setPassCode(user.getPassCode());
-			user.setPhoneNumber(user.getPhoneNumber());
-			user.setCountryCode(user.getCountryCode());
-			response.setCode(200);
+            response.setCode(200);
 			response.setStatusCode(200);
 			response.setMessage("Login Successfully");
 			return ResponseEntity.ok(response);	
@@ -311,7 +311,7 @@ RegisterResponse message=new RegisterResponse();
 		Contacts contact=new Contacts();
 		String phoneNumber = phoneBookServiceImpl.getPhoneNumber();
 	   	User user = phoneBookRepo.findByPhoneNumber(phoneNumber);
-		ArrayList<Contacts> contacts= contactsRepo.findByUserAndStatus(user, 0);
+		ArrayList<Contacts> contacts= contactsRepo.findByUserAndStatusOrderByIdDesc(user, 0);
 		return ResponseEntity.ok(contacts);
 	}
 	
@@ -416,8 +416,7 @@ RegisterResponse message=new RegisterResponse();
 				
 				// Generate Token 
 				
-				 final UserDetails userDetails =
-			 phoneBookServiceImpl.loadUserByUsername(String.valueOf(user.getPhoneNumber())); 
+				 final UserDetails userDetails =phoneBookServiceImpl.loadUserByUsername(String.valueOf(user.getPhoneNumber())); 
 				 token = jwtToken.generateToken(userDetails);
 		  } 
 		  else {
@@ -457,5 +456,23 @@ RegisterResponse message=new RegisterResponse();
 	   	phoneBookService.saveOrUpdate(user);
 	       return ResponseEntity.ok(message);
 	   }  
+	   
+	   
+	   @GetMapping("/users/export/pdf")
+	    public void exportToPDF(HttpServletResponse response) throws DocumentException, IOException {
+	        response.setContentType("application/pdf");
+	        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+	        String currentDateTime = dateFormatter.format(new Date());
+	         
+	        String headerKey = "Content-Disposition";
+	        String headerValue = "attachment; filename=users_" + currentDateTime + ".pdf";
+	        response.setHeader(headerKey, headerValue);
+	         
+	        List<User> listUsers = service.listAll();
+	         
+	        UserPDFExporter exporter = new UserPDFExporter(listUsers);
+	        exporter.export(response);
+	         
+	    }
 	   
 }  

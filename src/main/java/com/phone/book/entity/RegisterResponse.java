@@ -1,23 +1,17 @@
 package com.phone.book.entity;
 
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-@JsonPropertyOrder({"code","statusCode","message"})
 
 public class RegisterResponse {
 	
-	@JsonProperty("message")
+	//@JsonProperty("message")
 	private String message;
 	
-	@JsonProperty("code")
+	//@JsonProperty("code")
 	private int code;
 	
 	
 	
-	@JsonProperty("statusCode")
+	//@JsonProperty("statusCode")
     private int statusCode;
 	
 	public String getMessage() {

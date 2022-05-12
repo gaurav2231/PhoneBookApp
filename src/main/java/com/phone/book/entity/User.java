@@ -15,7 +15,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -23,13 +22,12 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Entity
 @Table(name="User", uniqueConstraints = {@UniqueConstraint(columnNames = {"phoneNumber","email"})})
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties({ "created","updated"})
-//@JsonPropertyOrder({"code","","","","",""})
+
 public class User {
 	
     @Id 
@@ -59,7 +57,6 @@ public class User {
 	@Column(name= "passCode")
 	private String passCode;
 	
-	//@NotBlank(message = "status is required")
 	@Column(name= "status")
     private int status = 0;
    

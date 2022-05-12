@@ -1,7 +1,6 @@
 package com.phone.book.repo;
 
 import org.springframework.data.repository.CrudRepository;
-
 import org.springframework.stereotype.Repository;
 
 import com.phone.book.entity.OtpDetails;
